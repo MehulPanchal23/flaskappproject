@@ -1,6 +1,6 @@
 services:
   flaskapptest:
-    image: mehulpanchal2323/flaskapptest:latest
+    build: .
     container_name: flaskapptest
     ports:
       - "80:80"
