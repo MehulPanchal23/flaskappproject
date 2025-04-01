@@ -1,0 +1,12 @@
+services:
+  flaskapptest:
+    image: mehulpanchal2323/flaskapptest:latest
+    container_name: flaskapptest
+    ports:
+      - "80:80"
+    networks:
+      - flaskappnet
+
+
+networks:
+  flaskappnet:
