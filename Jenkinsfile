@@ -1,10 +1,10 @@
 pipeline {
     agent { 
-        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'Prod') // Dynamically select agent
+        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'Prod')
     }
     environment {
-        BRANCH_NAME = env.JOB_NAME.contains('dev') ? 'dev' : 'master' // Set branch name
-        IMAGE_TAG = env.JOB_NAME.contains('dev') ? 'latest-dev' : 'latest-prod' // Different image tags
+        BRANCH_NAME = env.JOB_NAME.contains('dev') ? 'dev' : 'master'
+        IMAGE_TAG = env.JOB_NAME.contains('dev') ? 'latest-dev' : 'latest-prod'
     }
     stages {
         stage("Code Clone from GitHub") {
