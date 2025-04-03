@@ -1,6 +1,6 @@
 services:
   flaskapptest:
-    image: mehulpanchal2323/flaskappproject:latest
+    image: mehulpanchal2323/flaskappproject:${IMAGE_TAG}
     container_name: flaskapptest
     ports:
       - "80:80"
