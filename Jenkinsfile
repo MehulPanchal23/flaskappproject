@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     echo "Cloning branch: ${env.BRANCH_NAME}"
-                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: BRANCH_NAME
+                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: "${env.BRANCH_NAME}"
                 }
             }
         }
