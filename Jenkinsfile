@@ -1,6 +1,6 @@
 pipeline {
     agent { 
-        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'Prod') // Select agent dynamically
+        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'prod') // Select agent dynamically
     }
     stages {
         stage("Initialize Variables") {
