@@ -1,35 +1,40 @@
 pipeline {
-    agent { 
+    agent {
         label (env.JOB_NAME.contains('dev') ? 'Dev' : 'Prod')
     }
+
     environment {
-        // Temporary static placeholders; real values will be set in script block
-        BRANCH_NAME = ''
-        IMAGE_TAG = ''
+        BRANCH_NAME = 'default'   // temporary
+        IMAGE_TAG = 'default'     // temporary
     }
+
     stages {
-        stage("Set Environment Variables"){
+        stage('Set Environment Variables') {
             steps {
                 script {
                     env.BRANCH_NAME = env.JOB_NAME.contains('dev') ? 'dev' : 'master'
                     env.IMAGE_TAG = env.JOB_NAME.contains('dev') ? 'latest-dev' : 'latest-prod'
+                    echo "Branch to be cloned: ${env.BRANCH_NAME}"
                 }
             }
         }
-        stage("Code Clone from GitHub") {
+
+        stage('Checkout Code') {
             steps {
-                script {
-                    echo "Cloning branch: ${env.BRANCH_NAME}"
-                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: "${env.BRANCH_NAME}"
-                }
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "*/${env.BRANCH_NAME}"]],
+                    userRemoteConfigs: [[url: 'https://github.com/MehulPanchal23/flaskappproject.git']]
+                ])
             }
         }
-        stage("Build Docker Image") {
+
+        stage('Build Docker Image') {
             steps {
                 sh "docker build -t flaskappproject:${env.IMAGE_TAG} ."
             }
         }
-        stage("Push Image to Docker HUB") {
+
+        stage('Push Image to Docker HUB') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: "dockerhubcred",
@@ -42,13 +47,14 @@ pipeline {
                 }
             }
         }
-        stage("Deploy on Server") {
+
+        stage('Deploy on Server') {
             steps {
                 script {
-                    if (BRANCH_NAME == 'master') {
+                    if (env.BRANCH_NAME == 'master') {
                         echo "Deploying Production Image"
-                        sh "docker pull ${env.dockerhubuser}/flaskappproject:latest-dev" // Pull dev image in prod
-                        sh "docker tag ${env.dockerhubuser}/flaskappproject:latest-dev flaskappproject:prod"
+                        sh "docker pull ${env.dockerhubuser}/flaskappproject:latest-prod"
+                        sh "docker tag ${env.dockerhubuser}/flaskappproject:latest-prod flaskappproject:prod"
                         sh "docker compose up -d"
                     } else {
                         echo "Deploying Dev Image"
@@ -58,17 +64,18 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             emailext from: "panchalmehul191@gmail.com",
-                     subject: "Build Successful: ${BRANCH_NAME}",
-                     body: "Build and Deployment Successful for ${BRANCH_NAME}",
+                     subject: "Build Successful: ${env.BRANCH_NAME}",
+                     body: "Build and Deployment Successful for ${env.BRANCH_NAME}",
                      to: "panchalmehul195@gmail.com"
         }
         failure {
             emailext from: "panchalmehul191@gmail.com",
-                     subject: "Build Failed: ${BRANCH_NAME}",
-                     body: "Check Logs for Errors in ${BRANCH_NAME}",
+                     subject: "Build Failed: ${env.BRANCH_NAME}",
+                     body: "Check Logs for Errors in ${env.BRANCH_NAME}",
                      to: "panchalmehul195@gmail.com"
         }
     }
