@@ -41,7 +41,7 @@ pipeline {
             }
         }
         stage("Re-tag and Push Prod Image") {
-            when { expression { env.JOB_NAME.contains('master') } } // Only for Prod pipeline
+            when { expression { env.JOB_NAME.contains('prod') } } // Only for Prod pipeline
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: "dockerhubcred",
