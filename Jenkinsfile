@@ -58,13 +58,9 @@ pipeline {
         stage("Deploy on Server") {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'dev') {
-                        echo "Deploying Dev Image"
-                        sh "docker compose up -d"
-                    } else {
-                        echo "Deploying Prod Image"
-                        sh "docker compose up -d"
-                    }
+                    def tag = env.JOB_NAME.contains('dev') ? 'dev' : 'prod'
+                    sh "export IMAGE_TAG=latest-${tag} && docker compose up -d"
+        
                 }
             }
         }
