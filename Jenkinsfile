@@ -3,10 +3,19 @@ pipeline {
         label (env.JOB_NAME.contains('dev') ? 'Dev' : 'Prod')
     }
     environment {
-        BRANCH_NAME = env.JOB_NAME.contains('dev') ? 'dev' : 'master'
-        IMAGE_TAG = env.JOB_NAME.contains('dev') ? 'latest-dev' : 'latest-prod'
+        // Temporary static placeholders; real values will be set in script block
+        BRANCH_NAME = ''
+        IMAGE_TAG = ''
     }
     stages {
+        stage("Set Environment Variables"){
+            steps {
+                script {
+                    env.BRANCH_NAME = env.JOB_NAME.contains('dev') ? 'dev' : 'master'
+                    env.IMAGE_TAG = env.JOB_NAME.contains('dev') ? 'latest-dev' : 'latest-prod'
+                }
+            }
+        }
         stage("Code Clone from GitHub") {
             steps {
                 script {
