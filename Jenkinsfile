@@ -1,6 +1,6 @@
 pipeline{
     agent { 
-        label (env.JOB_NAME.contains('dev') ? 'dev' : 'prod') // Dynamically select agent
+        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'prod') // Dynamically select agent
     }
     stages{
         stage("Code Clone from GitHub") {
