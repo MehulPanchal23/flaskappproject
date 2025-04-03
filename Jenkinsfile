@@ -8,13 +8,13 @@ pipeline{
                 script {
                     def branch = env.JOB_NAME.contains('dev') ? 'dev' : 'master' // Select branch dynamically
                     echo "Cloning branch: ${branch}"
-                    git url: "https://github.com/MehulPanchal23/flask-app-ecs.git", branch: branch
+                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: branch
                 }
             }
         }
         stage("build image"){
             steps{
-                sh "docker build -t flaskapptest ."
+                sh "docker build -t flaskappproject ."
             }
         }
         stage("Push Image to Docker HUB"){
@@ -25,8 +25,8 @@ pipeline{
                     usernameVariable: "dockerhubuser"
                     )]){
                 sh "docker login -u ${env.dockerhubuser} -p ${env.dockerhubpass}"
-                sh "docker image tag flaskapptest ${env.dockerhubuser}/flaskapptest"
-                sh "docker push ${env.dockerhubuser}/flaskapptest:latest"
+                sh "docker image tag flaskappproject ${env.dockerhubuser}/flaskappproject"
+                sh "docker push ${env.dockerhubuser}/flaskappproject:latest"
                 }
             }
         }
