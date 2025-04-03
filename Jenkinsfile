@@ -1,56 +1,86 @@
-pipeline{
+pipeline {
     agent { 
-        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'prod') // Dynamically select agent
+        label (env.JOB_NAME.contains('dev') ? 'Dev' : 'Prod') // Select agent dynamically
     }
-    stages{
-        stage("Code Clone from GitHub") {
+    stages {
+        stage("Initialize Variables") {
             steps {
                 script {
-                    def branch = env.JOB_NAME.contains('dev') ? 'dev' : 'master' // Select branch dynamically
-                    echo "Cloning branch: ${branch}"
-                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: branch
+                    env.BRANCH_NAME = env.JOB_NAME.contains('dev') ? 'dev' : 'master'
+                    env.IMAGE_TAG = env.JOB_NAME.contains('dev') ? 'latest-dev' : 'latest-prod'
                 }
             }
         }
-        stage("build image"){
-            steps{
-                sh "docker build -t flaskappproject ."
+        stage("Code Clone from GitHub") {
+            when { expression { env.JOB_NAME.contains('dev') } } // Only for Dev pipeline
+            steps {
+                script {
+                    echo "Cloning branch: ${env.BRANCH_NAME}"
+                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: env.BRANCH_NAME
+                }
             }
         }
-        stage("Push Image to Docker HUB"){
-            steps{
+        stage("Build Docker Image") {
+            when { expression { env.JOB_NAME.contains('dev') } } // Only for Dev pipeline
+            steps {
+                sh "docker build -t flaskappproject:${env.IMAGE_TAG} ."
+            }
+        }
+        stage("Push Image to Docker HUB") {
+            when { expression { env.JOB_NAME.contains('dev') } } // Only for Dev pipeline
+            steps {
                 withCredentials([usernamePassword(
                     credentialsId: "dockerhubcred",
                     passwordVariable: "dockerhubpass",
                     usernameVariable: "dockerhubuser"
-                    )]){
-                sh "docker login -u ${env.dockerhubuser} -p ${env.dockerhubpass}"
-                sh "docker image tag flaskappproject ${env.dockerhubuser}/flaskappproject"
-                sh "docker push ${env.dockerhubuser}/flaskappproject:latest"
+                )]) {
+                    sh "docker login -u ${env.dockerhubuser} -p ${env.dockerhubpass}"
+                    sh "docker tag flaskappproject:${env.IMAGE_TAG} ${env.dockerhubuser}/flaskappproject:${env.IMAGE_TAG}"
+                    sh "docker push ${env.dockerhubuser}/flaskappproject:${env.IMAGE_TAG}"
                 }
             }
         }
-        stage("deployment"){
-           steps{ 
-               sh "docker compose up -d"
-           }
+        stage("Re-tag and Push Prod Image") {
+            when { expression { env.JOB_NAME.contains('master') } } // Only for Prod pipeline
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "dockerhubcred",
+                    passwordVariable: "dockerhubpass",
+                    usernameVariable: "dockerhubuser"
+                )]) {
+                    sh "docker login -u ${env.dockerhubuser} -p ${env.dockerhubpass}"
+                    sh "docker pull ${env.dockerhubuser}/flaskappproject:latest-dev" // Pull latest-dev image
+                    sh "docker tag ${env.dockerhubuser}/flaskappproject:latest-dev ${env.dockerhubuser}/flaskappproject:latest-prod"
+                    sh "docker push ${env.dockerhubuser}/flaskappproject:latest-prod" // Push latest-prod image
+                }
+            }
         }
-        
-    }
-post {
-    success {
-        emailext from: "panchalmehul191@gmail.com",
-                 subject: "Build SuccessFully",
-                 body: "Good All Okay",
-                 to: "panchalmehul195@gmail.com"
-            
+        stage("Deploy on Server") {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'dev') {
+                        echo "Deploying Dev Image"
+                        sh "docker compose up -d"
+                    } else {
+                        echo "Deploying Prod Image"
+                        sh "docker compose up -d"
+                    }
+                }
+            }
         }
-    failure {
-        emailext from: "panchalmehul191@gmail.com",
-                 subject: "Build Failed",
-                 body: "Not Good Check the Logs",
-                 to: "panchalmehul195@gmail.com"
-            
     }
-}
+    post {
+        success {
+            emailext from: "panchalmehul191@gmail.com",
+                     subject: "Build Successful: ${env.BRANCH_NAME}",
+                     body: "Build and Deployment Successful for ${env.BRANCH_NAME}",
+                     to: "panchalmehul195@gmail.com"
+        }
+        failure {
+            emailext from: "panchalmehul191@gmail.com",
+                     subject: "Build Failed: ${env.BRANCH_NAME}",
+                     body: "Check Logs for Errors in ${env.BRANCH_NAME}",
+                     to: "panchalmehul195@gmail.com"
+        }
+    }
 }
