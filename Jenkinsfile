@@ -8,7 +8,7 @@ pipeline{
                 script {
                     def branch = env.JOB_NAME.contains('dev') ? 'dev' : 'master' // Select branch dynamically
                     echo "Cloning branch: ${branch}"
-                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: branch
+                    git url: "https://github.com/MehulPanchal23/flaskappproject.git", branch: 
                 }
             }
         }
