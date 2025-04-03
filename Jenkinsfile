@@ -1,9 +1,15 @@
 pipeline{
-    agent {label 'Dev'};
+    agent { 
+        label (env.JOB_NAME.contains('dev') ? 'dev' : 'prod') // Dynamically select agent
+    }
     stages{
-        stage("Code Clone from GITHUB"){
-            steps{
-                git url: "https://github.com/MehulPanchal23/flask-app-ecs.git", branch: "master"
+        stage("Code Clone from GitHub") {
+            steps {
+                script {
+                    def branch = env.JOB_NAME.contains('dev') ? 'dev' : 'master' // Select branch dynamically
+                    echo "Cloning branch: ${branch}"
+                    git url: "https://github.com/MehulPanchal23/flask-app-ecs.git", branch: branch
+                }
             }
         }
         stage("build image"){
