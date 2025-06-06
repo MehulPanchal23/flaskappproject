@@ -87,11 +87,11 @@ from app import app
 app.run(debug=True, host='0.0.0.0', port=80)
 
 What this does:
-> Line 1: Import the Flask app object named app from your app.py file.
-> Line 2: Start the Flask development server with these options:
-> debug=True: Enables debug mode (auto-reloads app on code changes + shows detailed error messages).
-> host='0.0.0.0': Makes the server accessible from any IP address (not just localhost).
-> port=80: Runs the server on port 80 (the default HTTP port).
+* Line 1: Import the Flask app object named app from your app.py file.
+* Line 2: Start the Flask development server with these options:
+* debug=True: Enables debug mode (auto-reloads app on code changes + shows detailed error messages).
+* host='0.0.0.0': Makes the server accessible from any IP address (not just localhost).
+* port=80: Runs the server on port 80 (the default HTTP port).
 
 
 What happens behind the scenes?
