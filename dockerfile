@@ -6,6 +6,8 @@ COPY . .
 
 ## pip install -r requirements.txt will install all the requirement mentioned into the requirements.txt and place it into the particular directory.
 ##Now i want to define that directory as per myself that is why i have used --target=/app/deps 
+#Always use the -r flag to tell pip that it's a requirement file:
+
 RUN pip install --no-cache-dir -r requirements.txt --target=/app/deps
 
 ENV PYTHONPATH="/app/deps"
