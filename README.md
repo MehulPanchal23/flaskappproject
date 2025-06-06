@@ -51,6 +51,7 @@ This does:
 ✅ Stores it in the variable called app
 
 from flask import Flask
+
 Line 1: Import the Flask class from the flask package.
 * flask is the name of the installed package
 * Flask is a class inside that package
