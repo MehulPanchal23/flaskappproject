@@ -87,10 +87,18 @@ from app import app
 app.run(debug=True, host='0.0.0.0', port=80)
 
 What this does:
-Line 1: Import the Flask app object named app from your app.py file.
-Line 2: Start the Flask development server with these options:
-debug=True: Enables debug mode (auto-reloads app on code changes + shows detailed error messages).
-host='0.0.0.0': Makes the server accessible from any IP address (not just localhost).
-port=80: Runs the server on port 80 (the default HTTP port).
+> Line 1: Import the Flask app object named app from your app.py file.
+> Line 2: Start the Flask development server with these options:
+> debug=True: Enables debug mode (auto-reloads app on code changes + shows detailed error messages).
+> host='0.0.0.0': Makes the server accessible from any IP address (not just localhost).
+> port=80: Runs the server on port 80 (the default HTTP port).
 
 
+What happens behind the scenes?
+1. When you run the Flask app (app.run(...)), it starts a web server.
+2. Whenever a client (browser, curl, etc.) sends an HTTP request to your app’s URL:
+3. If the request URL path is / (the root), Flask matches it to the route decorated with @app.route('/').
+4. Flask then calls the function hello_world() behind that route.
+5. The function runs and returns the string response.
+6. Flask sends that response string back to the client as the HTTP response.
+7. Similarly, when the client visits /health, Flask calls your health() function automatically.
